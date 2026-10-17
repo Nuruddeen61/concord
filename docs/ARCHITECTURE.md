@@ -97,6 +97,7 @@ them. An action recorded ahead of its record time is picked up by `reconcileDue`
 `vitest` in `packages/core` and `services/api`. API tests build a real `Concord` with an in-memory
 store and a `FakeChain` (`services/api/test/helpers.ts`), so the suite needs no network and runs
 real password hashing at a low cost. The dashboard has no automated tests yet.
+Performance baselines for `replay` and `reconcilePositions` (100k events, 10k holders) are recorded in [performance.md](performance.md); run them with `pnpm bench`.
 
 ## Deliberate limits
 
