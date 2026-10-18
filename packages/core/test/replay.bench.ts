@@ -1,4 +1,4 @@
-import { bench, describe } from "vitest";
+import { describe, test } from "vitest";
 import type { AssetEvent } from "../src/events.js";
 import { replay } from "../src/holdings.js";
 import { reconcilePositions } from "../src/reconcile.js";
@@ -71,14 +71,26 @@ const withBreaks: RegisterPosition[] = matching.map((p, i) =>
   i % 100 === 0 ? ({ ...p, units: p.units + 1n } as RegisterPosition) : p,
 );
 
+// Vitest 5 benchmarks are tests: `bench` comes from the test context and results are reported
+// when the test finishes. Setup above runs once, outside the measured callbacks.
 const opts = { warmupIterations: 1, iterations: 10 };
 
 describe(`replay (${EVENTS} events, ${HOLDERS} holders)`, () => {
-  bench("events already in id order", () => void replay(sorted), opts);
-  bench("events in random order", () => void replay(unsorted), opts);
+  test("replay", { timeout: 120_000 }, async ({ bench }) => {
+    await bench.compare(
+      bench("events already in id order", () => void replay(sorted)),
+      bench("events in random order", () => void replay(unsorted)),
+      opts,
+    );
+  });
 });
 
 describe(`reconcilePositions (${HOLDERS} holders)`, () => {
-  bench("register matches chain", () => void reconcilePositions(state, matching), opts);
-  bench("1% of holders mismatched", () => void reconcilePositions(state, withBreaks), opts);
+  test("reconcilePositions", { timeout: 120_000 }, async ({ bench }) => {
+    await bench.compare(
+      bench("register matches chain", () => void reconcilePositions(state, matching)),
+      bench("1% of holders mismatched", () => void reconcilePositions(state, withBreaks)),
+      opts,
+    );
+  });
 });
